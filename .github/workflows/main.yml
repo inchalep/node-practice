@@ -53,10 +53,11 @@ jobs:
         env:
           CLASSIC_TOKEN: ${{ secrets.CLASSIC_TOKEN }}
         run: |
-          cd $WEB_DIR
+          cd /var/www/my-react-app
           git init
           git remote add origin https://$CLASSIC_TOKEN@github.com/<username>/<repo>.git
-          git checkout -b deploy || git reset --hard
+          git fetch origin
+          git checkout -B deploy || git checkout -b deploy
           git add .
-          git commit -m "Deploy React build [ci skip]"
+          git commit -m "Deploy React build [ci skip]" || echo "Nothing to commit"
           git push -u origin deploy --force
