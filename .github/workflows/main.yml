@@ -52,7 +52,7 @@ jobs:
         run: |
           cd build
           git init
-          git remote add origin https://$CLASSIC_TOKEN@github.com/<username>/<repo>.git
+          git remote add origin https://$CLASSIC_TOKEN@github.com/inchalep/node-practice.git
           git checkout -B deploy
           git add .
           git commit -m "Deploy React build [ci skip]" || echo "Nothing to commit"
