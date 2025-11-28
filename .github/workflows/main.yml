@@ -1,4 +1,4 @@
-name: Build & Deploy React App with Artifact & Token
+name: Build & Deploy React App
 
 on:
   push:
@@ -41,23 +41,19 @@ jobs:
           name: react-build
           path: ./build
 
-      - name: Deploy build to web folder
+      - name: Configure Git
         run: |
-          WEB_DIR=/var/www/my-react-app
-          rm -rf $WEB_DIR/*
-          mkdir -p $WEB_DIR
-          cp -r build/* $WEB_DIR/
-          echo "React app deployed to $WEB_DIR"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-      - name: Push build folder to GitHub (classic token)
+      - name: Push build to deploy branch
         env:
           CLASSIC_TOKEN: ${{ secrets.CLASSIC_TOKEN }}
         run: |
-          cd /var/www/my-react-app
+          cd build
           git init
           git remote add origin https://$CLASSIC_TOKEN@github.com/<username>/<repo>.git
-          git fetch origin
-          git checkout -B deploy || git checkout -b deploy
+          git checkout -B deploy
           git add .
           git commit -m "Deploy React build [ci skip]" || echo "Nothing to commit"
           git push -u origin deploy --force
