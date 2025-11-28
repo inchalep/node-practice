@@ -25,7 +25,7 @@ jobs:
         run: npm run build --if-present
 
       - name: Archive build files
-        run: tar -czf build.tar.gz .
+        run: tar --exclude='./node_modules' --exclude='.git' -czf build.tar.gz .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
