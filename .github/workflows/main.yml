@@ -1,22 +1,22 @@
-name: Build & Deploy React App to GitHub Pages
+name: Build & Deploy React App with Artifact & Token
 
 on:
   push:
     branches: ["main"]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -24,9 +24,39 @@ jobs:
       - name: Build React project
         run: npm run build
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.CLASSIC_TOKEN }}
-          publish_dir: ./build
-          publish_branch: gh-pages
+          name: react-build
+          path: build/
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: ./build
+
+      - name: Deploy build to web folder
+        run: |
+          WEB_DIR=/var/www/my-react-app
+          rm -rf $WEB_DIR/*
+          mkdir -p $WEB_DIR
+          cp -r build/* $WEB_DIR/
+          echo "React app deployed to $WEB_DIR"
+
+      - name: Optional: Push build folder to GitHub (classic token)
+        env:
+          CLASSIC_TOKEN: ${{ secrets.CLASSIC_TOKEN }}
+        run: |
+          cd $WEB_DIR
+          git init
+          git remote add origin https://$CLASSIC_TOKEN@github.com/<username>/<repo>.git
+          git checkout -b deploy || git reset --hard
+          git add .
+          git commit -m "Deploy React build [ci skip]"
+          git push -u origin deploy --force
