@@ -49,7 +49,7 @@ jobs:
           cp -r build/* $WEB_DIR/
           echo "React app deployed to $WEB_DIR"
 
-      - name: Optional: Push build folder to GitHub (classic token)
+      - name: Push build folder to GitHub (classic token)
         env:
           CLASSIC_TOKEN: ${{ secrets.CLASSIC_TOKEN }}
         run: |
