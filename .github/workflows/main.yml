@@ -1,59 +1,55 @@
-name: Build & Deploy React App
+
+name: Build & Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      
+env:
+  CI: false
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v1
         with:
-          node-version: 18
-          cache: npm
+          node-version: 16
 
       - name: Install dependencies
-        run: npm ci
+        uses: bahmutov/npm-install@v1
 
-      - name: Build React project
+      - name: Build project
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload production-ready build files
+        uses: actions/upload-artifact@v2
         with:
-          name: react-build
-          path: build/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: react-build
+          name: production-files
           path: ./build
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
-      - name: Push build to deploy branch
-        env:
-          CLASSIC_TOKEN: ${{ secrets.CLASSIC_TOKEN }}
-        run: |
-          cd build
-          git init
-          git remote add origin https://$CLASSIC_TOKEN@github.com/inchalep/node-practice.git
-          git checkout -B deploy
-          git add .
-          git commit -m "Deploy React build [ci skip]" || echo "Nothing to commit"
-          git push -u origin deploy --force
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: production-files
+          path: ./build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.CLASSIC_TOKEN }}
+          publish_dir: ./build
