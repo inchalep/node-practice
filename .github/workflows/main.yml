@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v1
         with:
           node-version: 18
           cache: "npm"
@@ -25,7 +25,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v6
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.CLASSIC_TOKEN }}
           publish_dir: ./build
